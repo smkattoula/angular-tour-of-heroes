@@ -11,6 +11,9 @@ import { Hero } from '../Hero';
 })
 export class HeroService {
   private heroesUrl = 'api/heroes';
+  private httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  };
 
   constructor(
     private http: HttpClient,
@@ -47,5 +50,24 @@ export class HeroService {
       catchError(this.handleError<Hero>('getHero id = ${id}'))
     );
     return hero;
+  }
+
+  // update an existing hero
+  updateHero(hero: Hero): Observable<any> {
+    const updatedHero = this.http
+      .put<Hero>(this.heroesUrl, hero, this.httpOptions)
+      .pipe(
+        tap((_) => this.log(`updated hero id = ${hero.id} `)),
+        catchError(this.handleError<any>('updateHero'))
+      );
+    return updatedHero;
+  }
+
+  // add a new hero to the server
+  addHero(hero: Hero): Observable<Hero> {
+    return this.http.post<Hero>(this.heroesUrl, hero, this.httpOptions).pipe(
+      tap((newHero: Hero) => this.log(`added hero w/ id = ${newHero.id}`)),
+      catchError(this.handleError<Hero>('addHero'))
+    );
   }
 }
